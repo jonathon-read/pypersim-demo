@@ -1,0 +1,50 @@
+[project]
+name = "pypersim-demo"
+version = "0.1.0"
+description = "A demonstration agent for use with pypersim"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.20.0",
+    "httpx>=0.27.0",
+    "lancedb>=0.16.0",
+    "orjson>=3.11.8",
+    "pyarrow>=18.0.0",
+    "sentence-transformers>=5.4.1",
+    "sqlmodel>=0.0.22",
+    "tqdm>=4.67.3",
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "google-adk>=1.32.0",
+    "platformdirs>=4.9.6",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+ignore = ["D"]
+
+[tool.ruff.format]
+docstring-code-format = true
+preview = true
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "mypy>=1.20.2",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "tqdm>=4.67.3",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
