@@ -166,7 +166,7 @@ All tools read from and write to two backing stores accessed via `AppContext`:
 | Price comparator | `price_comparator` sub-agent |
 | Customer memory | `store_memory`, `search_memory`, `list_memories`, `get_memory_details`, `forget_memory` (orchestrator) |
 | Preference-aware recommendations | `preference_advisor` sub-agent |
-| Basket management | `modify_order_line`, `clear_order` (orchestrator) — requires customer registration |
+| Basket management | `modify_order_line`, `clear_order` (orchestrator) |
 | Checkout | `checkout` (orchestrator) |
 | Order detail | `get_order` (orchestrator) |
 | Order history | `get_order_history` (orchestrator) |
