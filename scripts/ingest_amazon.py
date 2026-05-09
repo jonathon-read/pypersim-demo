@@ -191,7 +191,15 @@ def _meta_to_rows(record: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
             "value": "" if value is None else str(value),
         })
 
-    item_search_rows = [{"parent_asin": parent_asin, "title": item_row["title"]}]
+    item_search_rows = [
+        {
+            "parent_asin": parent_asin,
+            "title": item_row["title"],
+            "price": item_row["price"],
+            "average_rating": item_row["average_rating"],
+            "rating_number": item_row["rating_number"],
+        }
+    ]
 
     feature_rows: list[dict[str, Any]] = []
     for i, feature in enumerate(record.get("features") or []):
