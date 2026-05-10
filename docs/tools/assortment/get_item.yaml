@@ -1,0 +1,116 @@
+name: get_item
+version: 1
+
+purpose: >
+  Retrieve the full details of a specific product by its identifier, including
+  title, price, ratings, store, categories, features, and attributes.
+
+inputs:
+  - name: parent_asin
+    type: string
+    required: true
+    description: Unique product identifier
+
+outputs:
+  - name: parent_asin
+    type: string
+    nullable: false
+    description: Unique product identifier
+  - name: title
+    type: string
+    nullable: false
+    description: Product title
+  - name: price
+    type: float
+    nullable: true
+    description: Listed price; null if no price is available
+  - name: average_rating
+    type: float
+    nullable: false
+    description: Mean customer rating (0–5)
+  - name: rating_number
+    type: integer
+    nullable: false
+    description: Total number of customer ratings
+  - name: store
+    type: string
+    nullable: true
+    description: Seller or brand store name; null if not listed
+  - name: categories
+    type: list[string]
+    nullable: false
+    description: Ordered list of category labels from broad to specific
+  - name: features
+    type: list[string]
+    nullable: false
+    description: Bullet-point feature descriptions from the product listing
+  - name: details
+    type: list[object]
+    nullable: false
+    description: >
+      Structured attribute pairs from the product listing. Each entry contains:
+      attribute (string), value (string).
+  - name: found
+    type: boolean
+    nullable: true
+    description: Present and false only when the product does not exist; omitted on success
+
+idempotency: true
+
+logic:
+  - Validate that parent_asin is non-empty
+  - Look up the product by parent_asin
+  - If found, return full product record
+  - If not found, return {found: false}
+
+failure_modes:
+  - code: product_not_found
+    description: No product exists for the given parent_asin
+    handling: inform the user the product could not be found; suggest using semantic_product_search to locate the correct identifier
+  - code: invalid_asin
+    description: parent_asin is an empty string or malformed
+    handling: ask the user to provide a valid product identifier
+
+usage_guidelines:
+  when_to_use:
+    - Agent has a parent_asin (e.g. from search results or a previous conversation) and needs full product details
+    - User asks about price, features, or specifications of a specific product
+    - Agent needs to confirm product details before discussing an order
+  when_not_to_use:
+    - No parent_asin is known — call semantic_product_search first to identify candidates
+    - User is asking about reviews — call get_item_reviews instead (or in addition)
+    - Only a summary is needed and search results already contain sufficient detail
+  disambiguation:
+    - parent_asin comes from search results, order line items, or user input — always prefer the identifier from data over one the user types verbally
+    - If the user names a product but does not supply a parent_asin, call semantic_product_search first then get_item for the best match
+
+examples:
+  - input:
+      parent_asin: "B0C7KJKNSN"
+    output:
+      parent_asin: "B0C7KJKNSN"
+      title: "Organic Bello Marinara Sauce - 25 oz (Pack of 3)"
+      price: 28.57
+      average_rating: 4.6
+      rating_number: 1049
+      store: "Organic Bello"
+      categories: ["Grocery & Gourmet Food", "Pasta & Pizza Sauces", "Marinara"]
+      features:
+        - "USDA Certified Organic"
+        - "No added sugar"
+        - "Non-GMO Project Verified"
+      details:
+        - attribute: "Item Weight"
+          value: "4.69 pounds"
+        - attribute: "Package Dimensions"
+          value: "9.06 x 6.46 x 4.49 inches"
+  - input:
+      parent_asin: "DOESNOTEXIST"
+    output:
+      found: false
+
+composition:
+  typically_after:
+    - semantic_product_search
+  typically_before:
+    - get_item_reviews

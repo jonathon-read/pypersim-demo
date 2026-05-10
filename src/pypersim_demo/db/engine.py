@@ -32,5 +32,7 @@ def session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
 
 async def init_db(engine: AsyncEngine) -> None:
     """Create all SQLModel tables that do not yet exist in the database."""
+    import pypersim_demo.db.models  # noqa: F401 — registers models with SQLModel.metadata
+
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)

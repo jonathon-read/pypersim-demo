@@ -1,0 +1,83 @@
+name: semantic_product_search
+version: 1
+
+purpose: >
+  Find products in the catalogue that best match a natural-language description
+  or user need, returning ranked candidates for further exploration or purchase.
+
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: Natural-language description of what the user is looking for
+  - name: limit
+    type: integer
+    required: false
+    description: Maximum number of results to return (default 10)
+
+outputs:
+  - name: results
+    type: list[object]
+    nullable: false
+    description: >
+      Ranked list of matching products. Each entry contains:
+      parent_asin (string), title (string), price (float), average_rating (float), rating_number (int).
+
+idempotency: true
+
+logic:
+  - Validate that query is non-empty
+  - Encode the query into a vector embedding
+  - Search the product vector index for nearest neighbours up to limit
+  - Return results ordered by ascending distance (most relevant first)
+
+failure_modes:
+  - code: empty_query
+    description: query is an empty string or whitespace only
+    handling: ask the user to describe what they are looking for
+  - code: search_unavailable
+    description: vector index is not reachable
+    handling: retry once; if still failing, inform the user of a temporary issue
+
+usage_guidelines:
+  when_to_use:
+    - User describes a product need in natural language ("something for hiking", "a gift for a 5-year-old")
+    - User's intent is clear but no specific product_id or title is known
+    - Agent needs candidate products before calling get_item for details
+  when_not_to_use:
+    - User already provided a product_id — call get_item directly
+    - User is asking about an order or reviewing a product they already purchased
+    - Query is about pricing, availability, or reviews without a discovery intent
+  disambiguation:
+    - If the user names a brand or specific model, include it verbatim in query for best recall
+    - If limit is not specified by the user, use the default; only increase it if the user asks to see more results
+    - Results are ranked by semantic similarity, not by price or rating — use price and rating fields in the response to compare options, or call get_item for full product details
+    - This tool always returns up to limit results regardless of relevance; the agent must judge whether each result is a genuine match given the user's context and discard results that do not fit
+
+examples:
+  - input:
+      query: "organic pasta sauce with no added sugar"
+      limit: 3
+    output:
+      results:
+        - parent_asin: "B0C7KJKNSN"
+          title: "Organic Bello - 25 oz (Pack of 3)"
+          price: 28.57
+          rating_avg: 4.6
+          rating_num: 1049
+        - parent_asin: "B09SKQ9TT1"
+          title: "Lucini Italia Organic Spicy Tomato Sauce"
+          price: 12.13
+          rating_avg: 4.5
+          rating_num: 658
+        - parent_asin: "B07N115QXP"
+          title: "Godfather's Pizza Sauce"
+          price: 15.75
+          rating_avg: 4.6
+          rating_num: 277
+        
+
+composition:
+  typically_before:
+    - get_item
+    - get_item_reviews

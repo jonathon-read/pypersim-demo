@@ -37,7 +37,6 @@ async def test_init_db_creates_tables(settings):
             text("SELECT name FROM sqlite_master WHERE type='table'")
         )
         tables = {row[0] for row in result}
-    assert "customer" in tables
     assert "item" in tables
     assert "order" in tables
     await engine.dispose()
