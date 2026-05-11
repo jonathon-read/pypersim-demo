@@ -1,7 +1,4 @@
-import os
-from pathlib import Path
 
-import pytest
 
 from pypersim_demo.config import Settings
 

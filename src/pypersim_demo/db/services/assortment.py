@@ -45,7 +45,7 @@ async def get_item(ctx: AppContext, parent_asin: str):
         categories=list(categories_result.scalars().all()),
         details=[
             ItemAttribute(attribute=detail.attribute, value=detail.value)
-            for detail in details_result
+            for detail in details_result.scalars()
         ],
         features=list(features_result.scalars().all()),
     )

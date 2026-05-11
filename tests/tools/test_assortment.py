@@ -1,9 +1,9 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from pypersim_demo.context import AppContext
+from pypersim_demo.context import AppContext, set_ctx
 from pypersim_demo.db.services import DatabaseServicesError
 from pypersim_demo.schemas.assortment import ItemDetailResponse, ErrorResponse
-from pypersim_demo.tools.assortment import assortment_tools
+from pypersim_demo.tools.assortment import get_item
 
 
 def _make_ctx():
@@ -26,49 +26,49 @@ def _make_item_detail(**overrides):
     return ItemDetailResponse(**defaults)
 
 
-def _get_item_tool(ctx):
-    return assortment_tools(ctx)["get_item"]
-
-
 async def test_get_item_returns_item_detail_response():
     ctx = _make_ctx()
+    set_ctx(ctx)
     detail = _make_item_detail()
 
     with patch("pypersim_demo.tools.assortment._get_item", AsyncMock(return_value=detail)):
-        result = await _get_item_tool(ctx)(parent_asin="B001")
+        result = await get_item(parent_asin="B001")
 
     assert result == detail
 
 
 async def test_get_item_error_returns_error_response():
     ctx = _make_ctx()
+    set_ctx(ctx)
 
     with patch(
         "pypersim_demo.tools.assortment._get_item",
         AsyncMock(side_effect=DatabaseServicesError("parent_asin 'X' not found")),
     ):
-        result = await _get_item_tool(ctx)(parent_asin="X")
+        result = await get_item(parent_asin="X")
 
     assert isinstance(result, ErrorResponse)
 
 
 async def test_get_item_error_message_is_preserved():
     ctx = _make_ctx()
+    set_ctx(ctx)
 
     with patch(
         "pypersim_demo.tools.assortment._get_item",
         AsyncMock(side_effect=DatabaseServicesError("parent_asin 'X' not found")),
     ):
-        result = await _get_item_tool(ctx)(parent_asin="X")
+        result = await get_item(parent_asin="X")
 
     assert "not found" in result.error
 
 
 async def test_get_item_passes_parent_asin_to_service():
     ctx = _make_ctx()
+    set_ctx(ctx)
     mock = AsyncMock(return_value=_make_item_detail())
 
     with patch("pypersim_demo.tools.assortment._get_item", mock):
-        await _get_item_tool(ctx)(parent_asin="B999")
+        await get_item(parent_asin="B999")
 
     mock.assert_awaited_once_with(ctx, "B999")

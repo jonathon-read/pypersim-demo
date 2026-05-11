@@ -18,6 +18,7 @@ dependencies = [
     "platformdirs>=4.9.6",
     "pydantic>=2.13.3",
     "pydantic-settings>=2.14.0",
+    "litellm>=1.83.0",
 ]
 
 [build-system]
@@ -45,7 +46,15 @@ dev = [
     "tqdm>=4.67.3",
 ]
 
+[tool.mypy]
+python_version = "3.12"
+
+[[tool.mypy.overrides]]
+module = ["lancedb", "lancedb.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["src"]
+filterwarnings = ["ignore::UserWarning:google.adk"]
 

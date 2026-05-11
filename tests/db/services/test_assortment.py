@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from pypersim_demo.context import AppContext
-from pypersim_demo.db.models import Item, ItemCategory, ItemDetail, ItemFeature
+from pypersim_demo.db.models import ItemDetail
 from pypersim_demo.db.services._errors import DatabaseServicesError
 from pypersim_demo.db.services.assortment import get_item, search_items
 from pypersim_demo.schemas.assortment import ItemAttribute, ItemDetailResponse, ItemSearchResult
@@ -47,15 +47,17 @@ def _make_rdb_ctx(
         r.scalars.return_value = scalars
         return r
 
-    def _iter_result(rows):
+    def _scalars_iter_result(rows):
+        scalars_mock = MagicMock()
+        scalars_mock.__iter__ = MagicMock(return_value=iter(rows))
         r = MagicMock()
-        r.__iter__ = MagicMock(return_value=iter(rows))
+        r.scalars.return_value = scalars_mock
         return r
 
     execute_results = [
         _scalar_result(item),
         _scalars_result(categories),
-        _iter_result(details),
+        _scalars_iter_result(details),
         _scalars_result(features),
     ]
     ctx.rdb_session = MagicMock()

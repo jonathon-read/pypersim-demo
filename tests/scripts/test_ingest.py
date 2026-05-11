@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 import pytest
 
 from scripts.ingest_amazon import (
-    UUID_NAMESPACE,
     _batched,
     _feature_id,
     _meta_to_rows,
@@ -118,7 +117,7 @@ def test_meta_to_rows_deduplicates_categories():
 
 
 def test_meta_to_rows_deduplicates_details():
-    record = _valid_meta(details={"Weight": "1 lb", "Weight": "2 lb"})
+    record = _valid_meta(details={"Weight": "1 lb", "Volume": "2 fl oz"})
     rows = _meta_to_rows(record)
     attrs = [r["attribute"] for r in rows["item_detail"]]
     assert len(attrs) == len(set(attrs))
